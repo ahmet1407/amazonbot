@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify, Response
 from scraper_router import scrape_link
 from score_engine import generate_scorecard
@@ -23,16 +24,29 @@ def analyze():
 def message():
     data = request.form
     incoming_msg = data.get('Body')
+    print("🟡 Gelen mesaj:", incoming_msg)
 
-    if any(domain in incoming_msg for domain in ["amazon.com.tr", "hepsiburada.com", "trendyol.com"]):
-        try:
+    try:
+        if any(domain in incoming_msg for domain in ["amazon.com", "amazon.com.tr", "hepsiburada.com", "trendyol.com"]):
             product_data = scrape_link(incoming_msg)
+            print("🟢 Ürün verisi:", product_data)
+
             scorecard = generate_scorecard(product_data)
-            msg = f"📌 {scorecard['name']}\n💸 {scorecard['price']}\n✅ Tatmin: {scorecard['scores']['satisfaction']['score']} - {scorecard['scores']['satisfaction']['comment']}\n🧯 Risk: {scorecard['scores']['flaw']['score']} - {scorecard['scores']['flaw']['comment']}\n💠 Hissiyat: {scorecard['scores']['aura']['score']} - {scorecard['scores']['aura']['comment']}\n⚙️ Uzman: {scorecard['scores']['expert']['score']}"
-        except Exception as e:
-            msg = f"❌ Hata oluştu: {str(e)}"
-    else:
-        msg = "❗ Amazon, Hepsiburada veya Trendyol linki gönder."
+            print("🔵 Scorecard:", scorecard)
+
+            # Ana mesaj – test sırasında istersen sadece msg = str(scorecard) yapabilirsin
+            msg = f"""📌 {scorecard['name']}
+💸 {scorecard['price']}
+✅ Tatmin: {scorecard['scores']['satisfaction']['score']} - {scorecard['scores']['satisfaction']['comment']}
+🧯 Risk: {scorecard['scores']['flaw']['score']} - {scorecard['scores']['flaw']['comment']}
+💠 Hissiyat: {scorecard['scores']['aura']['score']} - {scorecard['scores']['aura']['comment']}
+⚙️ Uzman: {scorecard['scores']['expert']['score']}
+"""
+        else:
+            msg = "❗ Lütfen geçerli bir Amazon, Hepsiburada veya Trendyol linki gönderin."
+    except Exception as e:
+        print("🔴 HATA:", str(e))
+        msg = f"❌ Hata oluştu: {str(e)}"
 
     twiml_response = f"""<?xml version="1.0" encoding="UTF-8"?>
 <Response>
