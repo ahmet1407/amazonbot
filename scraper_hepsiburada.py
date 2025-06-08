@@ -1,10 +1,22 @@
+import requests
+from bs4 import BeautifulSoup
+
 def scrape_hepsiburada(url):
+    headers = {
+        "User-Agent": "Mozilla/5.0",
+    }
+    response = requests.get(url, headers=headers)
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    name = soup.select_one("h1.product-name")
+    price = soup.select_one("div.product-price span")
+
     return {
-        "name": "Dyson Supersonic Nural",
-        "price": "15.999 TL",
-        "segment": "Premium",
-        "reviews": [
-            "Hızlı kurutuyor", "Saçlar elektriklenmiyor", "Şık ve sessiz"
-        ],
-        "expert_score": 90
+        "name": name.text.strip() if name else "Ad yok",
+        "price": price.text.strip() if price else "Fiyat yok",
+        "comments": [
+            "Kargo hızlıydı, paketleme iyiydi.",
+            "Beklediğimden küçük geldi.",
+            "Tavsiye ederim."
+        ]
     }
