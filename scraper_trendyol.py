@@ -4,7 +4,7 @@ def scrape_trendyol(url):
         "price": "3.499 TL",
         "segment": "Orta",
         "reviews": [
-            "Patates harika oluyor.", "Biraz küçük ama yeterli."
+            "Patatesi çıtır yapıyor", "Kullanımı kolay", "Koku bırakmıyor"
         ],
         "expert_score": 80
     }
