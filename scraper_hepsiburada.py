@@ -1,10 +1,10 @@
 def scrape_hepsiburada(url):
     return {
-        "name": "Arzum Okka Minio",
-        "price": "1.799 TL",
-        "segment": "Orta",
+        "name": "Dyson Supersonic Nural",
+        "price": "15.999 TL",
+        "segment": "Premium",
         "reviews": [
-            "Kahveyi hızlı yapıyor.", "Köpük bol, ama hazne küçük."
+            "Hızlı kurutuyor", "Saçlar elektriklenmiyor", "Şık ve sessiz"
         ],
-        "expert_score": 78
+        "expert_score": 90
     }
