@@ -1,4 +1,4 @@
-def get_alternative_products(main_product_name):
+def get_alternative_products(product_name):
     return [
         {
             "name": "Philips 8000 Series XC8045/01",
@@ -9,7 +9,7 @@ def get_alternative_products(main_product_name):
                 "aura": 81,
                 "expert": 88
             },
-            "summary": "Kullanım kolaylığı ve güçlü çekimle öne çıkıyor. Ancak bazı kullanıcılar plastik parçalardan şikayetçi."
+            "summary": "Kullanım kolaylığı ve güçlü çekimle öne çıkıyor."
         },
         {
             "name": "Xiaomi G10",
@@ -20,6 +20,6 @@ def get_alternative_products(main_product_name):
                 "aura": 75,
                 "expert": 81
             },
-            "summary": "Fiyat/performans açısından çok güçlü. Ancak batarya ve yedek parça erişimi zayıf kalabiliyor."
+            "summary": "Fiyat/performans açısından başarılı, ancak pil ömrü kısa."
         }
     ]
