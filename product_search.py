@@ -13,7 +13,7 @@ def search_product_url(query):
     results = response.json()
 
     for result in results.get("organic_results", []):
-        link = result.get("link")
-        if any(x in link for x in ["amazon.com", "hepsiburada.com", "trendyol.com"]):
+        link = result.get("link", "")
+        if any(domain in link for domain in ["amazon.com", "hepsiburada.com", "trendyol.com"]):
             return link
     return None
