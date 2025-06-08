@@ -17,7 +17,6 @@ def analyze():
         scorecard = generate_scorecard(product_data)
         return jsonify(scorecard)
     except Exception as e:
-        print("❌ Analyze endpoint hatası:", str(e))
         return jsonify({"error": str(e)}), 500
 
 @app.route('/message', methods=['POST'])
@@ -30,20 +29,19 @@ def message():
         product_data = scrape_link(incoming_msg)
         scorecard = generate_scorecard(product_data)
 
-        scores = scorecard.get('scores', {})
         msg = (
-            f"📌 {scorecard.get('name', 'Ürün bulunamadı')}\n"
-            f"💸 {scorecard.get('price', 'Fiyat yok')}\n"
-            f"✅ Tatmin: {scores.get('satisfaction', {}).get('score', '—')} - {scores.get('satisfaction', {}).get('comment', '')}\n"
-            f"🧯 Risk: {scores.get('flaw', {}).get('score', '—')} - {scores.get('flaw', {}).get('comment', '')}\n"
-            f"💠 Hissiyat: {scores.get('aura', {}).get('score', '—')} - {scores.get('aura', {}).get('comment', '')}\n"
-            f"⚙️ Uzman: {scores.get('expert', {}).get('score', '—')} - {scores.get('expert', {}).get('comment', '')}"
+            f"📌 {scorecard['name']}\n"
+            f"💸 {scorecard['price']}\n"
+            f"✅ Tatmin: {scorecard['scores']['satisfaction']['score']} - {scorecard['scores']['satisfaction']['comment']}\n"
+            f"🧯 Risk: {scorecard['scores']['flaw']['score']} - {scorecard['scores']['flaw']['comment']}\n"
+            f"💠 Hissiyat: {scorecard['scores']['aura']['score']} - {scorecard['scores']['aura']['comment']}\n"
+            f"⚙️ Uzman: {scorecard['scores']['expert']['score']} - {scorecard['scores']['expert']['comment']}"
         )
     except Exception as e:
-        print("❌ Message endpoint hatası:", str(e))
+        print("❌ Hata:", str(e))
         msg = f"❌ Hata oluştu: {str(e)}"
 
-    twiml = f"""<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+    twiml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <Response>
     <Message>{msg}</Message>
 </Response>"""
