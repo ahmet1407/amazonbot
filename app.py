@@ -4,28 +4,29 @@ from scorecard_logic import analyze_product_from_amazon
 
 app = Flask(__name__)
 
-@app.route("/message", methods=['POST'])
+@app.route("/message", methods=["POST"])
 def message():
-    incoming_msg = request.values.get('Body', '').strip()
+    incoming_msg = request.values.get("Body", "").strip()
     resp = MessagingResponse()
 
-    if "http" in incoming_msg and "amazon" in incoming_msg:
+    if "amazon." in incoming_msg:
         try:
             result = analyze_product_from_amazon(incoming_msg)
-            msg = f"""📌 {result['name']}
-💸 Fiyat: {result['price']}
 
-✅ Tatmin: {result['scores']['Satisfaction']['value']} - {result['scores']['Satisfaction']['note']}
-🧯 Risk: {result['scores']['Risk']['value']} - {result['scores']['Risk']['note']}
-💠 Hissiyat: {result['scores']['Feel']['value']} - {result['scores']['Feel']['note']}
-⚙️ Uzman Testi: {result['scores']['Expert Test']['value']} - {result['scores']['Expert Test']['note']}
-"""
+            name = result.get("name", "Ürün adı alınamadı")
+            price = result.get("price", "Fiyat bilgisi yok")
+            scores = result.get("scores", {})
+
+            reply = f"📌 *{name}*\n💸 Fiyat: {price}\n\n"
+            for title, data in scores.items():
+                reply += f"🔹 *{title}:* {data['value']} — _{data['note']}_\n"
+
         except Exception as e:
-            msg = f"Ürün analiz edilemedi: {str(e)}"
+            reply = f"Ürün analiz edilirken hata oluştu: {str(e)}"
     else:
-        msg = "Lütfen Amazon ürün linki gönderin."
+        reply = "Lütfen geçerli bir Amazon ürün linki gönderin."
 
-    resp.message(msg)
+    resp.message(reply)
     return str(resp)
 
 if __name__ == "__main__":
