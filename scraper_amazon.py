@@ -4,7 +4,7 @@ def scrape_amazon(url):
         "price": "18.999 TL",
         "segment": "Premium",
         "reviews": [
-            "Çekim gücü çok iyi", "LED ışıklı başlık harika", "Fiyatı pahalı ama değer"
+            "Çekim gücü mükemmel", "LED başlık çok işlevsel", "Pahalı ama değer"
         ],
         "expert_score": 94
     }
