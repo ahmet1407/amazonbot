@@ -10,4 +10,4 @@ def scrape_link(url):
     elif "trendyol.com" in url:
         return scrape_trendyol(url)
     else:
-        raise ValueError("Desteklenmeyen link. Sadece Amazon, Hepsiburada ve Trendyol destekleniyor.")
+        raise ValueError("Desteklenmeyen link.")
