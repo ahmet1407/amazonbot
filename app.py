@@ -7,39 +7,25 @@ app = Flask(__name__)
 @app.route("/message", methods=['POST'])
 def message():
     incoming_msg = request.values.get('Body', '').strip()
-
     resp = MessagingResponse()
 
-    if incoming_msg.startswith("http") and "amazon" in incoming_msg:
+    if "http" in incoming_msg and "amazon" in incoming_msg:
         try:
             result = analyze_product_from_amazon(incoming_msg)
-            name = result["name"]
-            price = result["price"]
-            scores = result["scores"]
+            msg = f"""📌 {result['name']}
+💸 Fiyat: {result['price']}
 
-            reply = f"""📌 {name}
-💸 {price}
-
-### Skorlar (100 üzerinden)
-
-✅ Tatmin: {scores['Satisfaction']['value']}
-{scores['Satisfaction']['note']}
-
-🧯 Risk: {scores['Risk']['value']}
-{scores['Risk']['note']}
-
-💠 Hissiyat: {scores['Feel']['value']}
-{scores['Feel']['note']}
-
-⚙️ Uzman Skoru: {scores['Expert Test']['value']}
-{scores['Expert Test']['note']}
+✅ Tatmin: {result['scores']['Satisfaction']['value']} - {result['scores']['Satisfaction']['note']}
+🧯 Risk: {result['scores']['Risk']['value']} - {result['scores']['Risk']['note']}
+💠 Hissiyat: {result['scores']['Feel']['value']} - {result['scores']['Feel']['note']}
+⚙️ Uzman Testi: {result['scores']['Expert Test']['value']} - {result['scores']['Expert Test']['note']}
 """
         except Exception as e:
-            reply = f"Ürün analiz edilirken bir hata oluştu: {e}"
+            msg = f"Ürün analiz edilemedi: {str(e)}"
     else:
-        reply = "Lütfen geçerli bir Amazon ürün linki gönderin."
+        msg = "Lütfen Amazon ürün linki gönderin."
 
-    resp.message(reply)
+    resp.message(msg)
     return str(resp)
 
 if __name__ == "__main__":
