@@ -9,41 +9,37 @@ def scrape_amazon(url):
 
     try:
         response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
-    except Exception as e:
-        return {"error": f"Bağlantı sağlanamadı: {e}"}
-
-    soup = BeautifulSoup(response.text, "html.parser")
-
-    try:
-        title = soup.find(id="productTitle").get_text(strip=True)
+        soup = BeautifulSoup(response.text, "html.parser")
     except:
-        title = "Ürün başlığı alınamadı"
+        return {"name": "Erişim hatası", "price": "-", "average_rating": 0, "review_count": 0, "positive_count": 0, "negative_count": 0}
 
     try:
-        price_tag = soup.find("span", {"class": re.compile(".*price.*")})
-        price = price_tag.get_text(strip=True)
+        name = soup.find("span", {"id": "productTitle"}).get_text(strip=True)
+    except:
+        name = "Ürün adı alınamadı"
+
+    try:
+        price = soup.find("span", {"class": "a-price-whole"}).get_text(strip=True)
     except:
         price = "Fiyat alınamadı"
 
     try:
-        rating_tag = soup.find("span", {"class": "a-icon-alt"})
-        rating = rating_tag.get_text(strip=True).split(" ")[0]
+        rating = soup.find("span", {"class": "a-icon-alt"}).get_text(strip=True)
+        average_rating = float(rating.split(" ")[0])
     except:
-        rating = "Puan alınamadı"
+        average_rating = 0
 
     try:
-        comment_section = soup.find("div", {"id": "cm-cr-dp-review-list"})
-        comments = comment_section.get_text(" ", strip=True) if comment_section else ""
-        pos_score = comments.lower().count("excellent") + comments.lower().count("perfect")
-        neg_score = comments.lower().count("terrible") + comments.lower().count("bad")
+        review_count = soup.find("span", {"id": "acrCustomerReviewText"}).get_text(strip=True)
+        review_count = int(review_count.split()[0].replace(",", ""))
     except:
-        pos_score, neg_score = 0, 0
+        review_count = 0
 
     return {
-        "name": title,
-        "price": price,
-        "rating": rating,
-        "positive_mentions": pos_score,
-        "negative_mentions": neg_score
+        "name": name,
+        "price": price + " USD",
+        "average_rating": average_rating,
+        "review_count": review_count,
+        "positive_count": int(review_count * average_rating / 5),
+        "negative_count": int(review_count * (5 - average_rating) / 5)
     }
