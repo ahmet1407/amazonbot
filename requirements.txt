@@ -2,5 +2,5 @@ flask
 twilio
 requests
 beautifulsoup4
-pandas
 openai
+pandas
