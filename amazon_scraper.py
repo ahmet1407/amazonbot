@@ -11,37 +11,35 @@ def scrape_amazon(url):
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
     except Exception as e:
-        return {"error": f"Bağlantı sağlanamadı: {e}"}
+        return {"error": f"Bağlantı hatası: {e}"}
 
-    soup = BeautifulSoup(response.text, "html.parser")
+    soup = BeautifulSoup(response.content, "html.parser")
 
     try:
         title = soup.find(id="productTitle").get_text(strip=True)
     except:
-        title = "Ürün başlığı alınamadı"
+        title = "Ürün adı alınamadı"
 
     try:
-        price_tag = soup.find("span", {"class": re.compile(".*price.*")})
-        if not price_tag:
-            price_tag = soup.find("span", {"class": "a-offscreen"})
-        price = price_tag.get_text(strip=True)
+        price_block = soup.find("span", {"class": re.compile(".*price.*")})
+        price = price_block.get_text(strip=True) if price_block else "Fiyat alınamadı"
     except:
         price = "Fiyat alınamadı"
 
     try:
-        rating_tag = soup.find("span", {"class": "a-icon-alt"})
-        rating = rating_tag.get_text(strip=True).split(" ")[0]
+        rating_block = soup.find("span", {"class": re.compile(".*a-icon-alt.*")})
+        rating = rating_block.get_text(strip=True).split(" ")[0] if rating_block else "Puan alınamadı"
     except:
         rating = "Puan alınamadı"
 
     try:
-        review_tag = soup.find("span", {"id": "acrCustomerReviewText"})
-        review_count = review_tag.get_text(strip=True).split(" ")[0]
+        reviews = soup.find(id="acrCustomerReviewText")
+        review_count = reviews.get_text(strip=True).split(" ")[0] if reviews else "0"
     except:
-        review_count = "Yorum sayısı alınamadı"
+        review_count = "0"
 
     return {
-        "name": title,
+        "title": title,
         "price": price,
         "rating": rating,
         "review_count": review_count
