@@ -7,13 +7,13 @@ app = Flask(__name__)
 @app.route('/analyze', methods=['POST'])
 def analyze():
     data = request.get_json()
-    product_url = data.get('url')
+    product_input = data.get('url') or data.get('query')
 
-    if not product_url:
-        return jsonify({"error": "Ürün linki gerekli."}), 400
+    if not product_input:
+        return jsonify({"error": "Ürün linki ya da ismi gerekli."}), 400
 
     try:
-        product_data = scrape_link(product_url)
+        product_data = scrape_link(product_input)
         scorecard = generate_scorecard(product_data)
         return jsonify(scorecard)
     except Exception as e:
@@ -25,31 +25,26 @@ def message():
     incoming_msg = data.get('Body', '').strip()
     print("📩 Gelen mesaj:", incoming_msg)
 
-    msg_lower = incoming_msg.lower()
-    if any(domain in msg_lower for domain in ["amazon", "amzn.eu", "hepsiburada", "trendyol"]):
-        try:
-            product_data = scrape_link(incoming_msg)
-            scorecard = generate_scorecard(product_data)
+    try:
+        product_data = scrape_link(incoming_msg)
+        scorecard = generate_scorecard(product_data)
 
-            msg = (
-                f"📌 {scorecard['name']}\n"
-                f"💸 {scorecard['price']}\n"
-                f"✅ Tatmin: {scorecard['scores']['satisfaction']['score']} - {scorecard['scores']['satisfaction']['comment']}\n"
-                f"🧯 Risk: {scorecard['scores']['flaw']['score']} - {scorecard['scores']['flaw']['comment']}\n"
-                f"💠 Hissiyat: {scorecard['scores']['aura']['score']} - {scorecard['scores']['aura']['comment']}\n"
-                f"⚙️ Uzman: {scorecard['scores']['expert']['score']} - {scorecard['scores']['expert']['comment']}"
-            )
-        except Exception as e:
-            print("❌ Hata:", str(e))
-            msg = f"❌ Hata oluştu: {str(e)}"
-    else:
-        msg = "❗ Amazon, Hepsiburada veya Trendyol linki gönder."
+        msg = (
+            f"📌 {scorecard['name']}\n"
+            f"💸 {scorecard['price']}\n"
+            f"✅ Tatmin: {scorecard['scores']['satisfaction']['score']} - {scorecard['scores']['satisfaction']['comment']}\n"
+            f"🧯 Risk: {scorecard['scores']['flaw']['score']} - {scorecard['scores']['flaw']['comment']}\n"
+            f"💠 Hissiyat: {scorecard['scores']['aura']['score']} - {scorecard['scores']['aura']['comment']}\n"
+            f"⚙️ Uzman: {scorecard['scores']['expert']['score']} - {scorecard['scores']['expert']['comment']}"
+        )
+    except Exception as e:
+        print("❌ Hata:", str(e))
+        msg = f"❌ Hata oluştu: {str(e)}"
 
     twiml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <Response>
     <Message>{msg}</Message>
 </Response>"""
-
     return Response(twiml, mimetype="application/xml")
 
 if __name__ == "__main__":
