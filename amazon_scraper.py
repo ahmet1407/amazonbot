@@ -11,36 +11,39 @@ def scrape_amazon(url):
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
     except Exception as e:
-        return {"error": f"Bağlantı hatası: {e}"}
+        return {"error": f"Bağlantı sağlanamadı: {e}"}
 
-    soup = BeautifulSoup(response.content, "html.parser")
+    soup = BeautifulSoup(response.text, "html.parser")
 
     try:
         title = soup.find(id="productTitle").get_text(strip=True)
     except:
-        title = "Ürün adı alınamadı"
+        title = "Ürün başlığı alınamadı"
 
     try:
-        price_block = soup.find("span", {"class": re.compile(".*price.*")})
-        price = price_block.get_text(strip=True) if price_block else "Fiyat alınamadı"
+        price_tag = soup.find("span", {"class": re.compile(".*price.*")})
+        price = price_tag.get_text(strip=True)
     except:
         price = "Fiyat alınamadı"
 
     try:
-        rating_block = soup.find("span", {"class": re.compile(".*a-icon-alt.*")})
-        rating = rating_block.get_text(strip=True).split(" ")[0] if rating_block else "Puan alınamadı"
+        rating_tag = soup.find("span", {"class": "a-icon-alt"})
+        rating = rating_tag.get_text(strip=True).split(" ")[0]
     except:
         rating = "Puan alınamadı"
 
     try:
-        reviews = soup.find(id="acrCustomerReviewText")
-        review_count = reviews.get_text(strip=True).split(" ")[0] if reviews else "0"
+        comment_section = soup.find("div", {"id": "cm-cr-dp-review-list"})
+        comments = comment_section.get_text(" ", strip=True) if comment_section else ""
+        pos_score = comments.lower().count("excellent") + comments.lower().count("perfect")
+        neg_score = comments.lower().count("terrible") + comments.lower().count("bad")
     except:
-        review_count = "0"
+        pos_score, neg_score = 0, 0
 
     return {
-        "title": title,
+        "name": title,
         "price": price,
         "rating": rating,
-        "review_count": review_count
+        "positive_mentions": pos_score,
+        "negative_mentions": neg_score
     }
