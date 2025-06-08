@@ -1,36 +1,46 @@
-from openai_helper import generate_comment
-from product_compare import get_alternative_products
+import os
+from openai import OpenAI
 
-def generate_scorecard(data):
-    reviews = data["reviews"]
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-    prompt_satisfaction = f"Bu kullanıcı yorumlarına göre ürün tatmin edici mi? Açıkla:\n{reviews}"
-    prompt_flaw = f"Bu yorumlara göre ürünle ilgili risk/kusur var mı? Açıkla:\n{reviews}"
-    prompt_aura = f"Yorumlara göre ürünün hissiyatı nasıl algılanıyor? Açıkla:\n{reviews}"
+def generate_scorecard(product_data):
+    comments = "\n".join(product_data["comments"])
+    prompt = f"""Aşağıdaki ürün yorumlarını analiz et:
+Ürün: {product_data['name']}
+Yorumlar:
+{comments}
 
-    scores = {
-        "satisfaction": {
-            "score": 90,
-            "comment": generate_comment(prompt_satisfaction)
-        },
-        "flaw": {
-            "score": 15,
-            "comment": generate_comment(prompt_flaw)
-        },
-        "aura": {
-            "score": 85,
-            "comment": generate_comment(prompt_aura)
-        },
-        "expert": {
-            "score": data["expert_score"],
-            "comment": "Bağımsız testlerde genel performansı yüksek çıktı."
-        }
-    }
+Bu verilere göre:
+- Tatmin puanı (100 üzerinden)
+- Risk puanı (kusur/şikayet)
+- Hissiyat (ürünün bıraktığı izlenim)
+- Uzman değerlendirme puanı
+- 2-3 cümlelik genel yorum
+
+Sonuçları JSON olarak ver."""
+
+    response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": "Bir ürün değerlendirme analistisin."},
+            {"role": "user", "content": prompt}
+        ]
+    )
+
+    reply = response.choices[0].message.content
+
+    import json
+    scores = json.loads(reply)
 
     return {
-        "name": data["name"],
-        "price": data["price"],
-        "segment": data["segment"],
-        "scores": scores,
-        "alternatives": get_alternative_products(data["name"])
+        "name": product_data["name"],
+        "price": product_data["price"],
+        "segment": "Orta-Üst Seviye" if scores["Tatmin"] > 80 else "Ekonomik",
+        "scores": {
+            "satisfaction": {"score": scores["Tatmin"]},
+            "flaw": {"score": scores["Risk"]},
+            "aura": {"score": scores["Hissiyat"]},
+            "expert": {"score": scores["Uzman değerlendirme puanı"]}
+        },
+        "summary": scores["Genel yorum"]
     }
