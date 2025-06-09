@@ -11,10 +11,15 @@ def scrape_amazon(url):
         "engine": "amazon_product",
         "url": url
     }
-    response = requests.get("https://serpapi.com/search", params=params)
+
+    response = requests.get("https://serpapi.com/search.json", params=params)
     data = response.json()
 
-    print("📦 Amazon verisi:", data)  # Debug log
+    # Debug log
+    print("📦 SerpAPI Amazon verisi:", data)
+
+    if "error" in data:
+        raise ValueError(f"SerpAPI Hatası: {data['error']}")
 
     return {
         "name": data.get("title", "Ürün adı bulunamadı"),
