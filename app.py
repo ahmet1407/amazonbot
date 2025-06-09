@@ -8,7 +8,6 @@ app = Flask(__name__)
 def analyze():
     data = request.get_json()
     product_input = data.get('url') or data.get('query')
-
     if not product_input:
         return jsonify({"error": "Ürün linki ya da ismi gerekli."}), 400
 
@@ -37,6 +36,8 @@ def message():
             f"💠 Hissiyat: {scorecard['scores']['aura']['score']} - {scorecard['scores']['aura']['comment']}\n"
             f"⚙️ Uzman: {scorecard['scores']['expert']['score']} - {scorecard['scores']['expert']['comment']}"
         )
+
+        print("📤 WhatsApp mesajı:", msg)  # Debug log
     except Exception as e:
         print("❌ Hata:", str(e))
         msg = f"❌ Hata oluştu: {str(e)}"
