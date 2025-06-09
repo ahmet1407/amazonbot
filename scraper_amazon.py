@@ -1,22 +1,22 @@
+import os
 import requests
-from bs4 import BeautifulSoup
 
-def scrape_amazon(url):
-    headers = {
-        "User-Agent": "Mozilla/5.0",
-    }
-    response = requests.get(url, headers=headers)
-    soup = BeautifulSoup(response.text, "html.parser")
-
-    name = soup.select_one("#productTitle")
-    price = soup.select_one(".a-price .a-offscreen")
-
-    return {
-        "name": name.text.strip() if name else "Ad yok",
-        "price": price.text.strip() if price else "Fiyat yok",
-        "comments": [
-            "Çok sessiz çalışıyor.",
-            "Pil ömrü biraz daha uzun olabilirdi.",
-            "Tasarımı çok şık."
-        ]
-    }
+def scrape_amazon(input_text):
+    if input_text.startswith("http"):
+        # Gerçek linkle sahte veri (test amaçlı)
+        return {
+            "name": "Duracell CR2032 Pil",
+            "price": "149 TL",
+            "segment": "Ekonomik",
+            "reviews": ["Fiyat/performans ürünü", "Hızlı geldi", "Pil kutusu sağlam"],
+            "expert_score": 78
+        }
+    else:
+        # Yazıyla gelen örnek
+        return {
+            "name": "Dyson V15 Detect",
+            "price": "18.999 TL",
+            "segment": "Premium",
+            "reviews": ["Çekim gücü çok iyi", "Tozları görünce mutlu oldum", "Kablo derdi yok"],
+            "expert_score": 94
+        }
