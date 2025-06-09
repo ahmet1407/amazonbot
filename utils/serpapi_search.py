@@ -1,23 +1,25 @@
-import requests
 import os
+import requests
+from urllib.parse import urlencode
 
-SERPAPI_API_KEY = os.environ.get("SERPAPI_API_KEY")
+SERPAPI_KEY = os.getenv("SERPAPI_KEY")
 
-def get_best_link_from_search(query: str) -> str:
+def perform_serpapi_search(url: str) -> dict:
+    if not SERPAPI_KEY:
+        raise ValueError("SERPAPI_KEY environment variable not set.")
+
     params = {
         "engine": "google",
-        "q": query,
-        "num": 10,
-        "api_key": SERPAPI_API_KEY
+        "q": url,
+        "api_key": SERPAPI_KEY,
+        "device": "desktop",
+        "num": "10"
     }
 
-    response = requests.get("https://serpapi.com/search", params=params)
-    data = response.json()
+    endpoint = f"https://serpapi.com/search.json?{urlencode(params)}"
+    response = requests.get(endpoint)
+    
+    if response.status_code != 200:
+        raise Exception(f"SerpAPI error: {response.status_code}, {response.text}")
 
-    results = data.get("organic_results", [])
-
-    for result in results:
-        link = result.get("link")
-        if "amazon.com.tr" in link or "hepsiburada.com" in link:
-            return link  # Öncelikli platformlar
-    return results[0].get("link") if results else None
+    return response.json()
