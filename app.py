@@ -45,7 +45,7 @@ def message():
         logging.exception("❌ WhatsApp mesajı hatası")
         msg = f"❌ Hata oluştu: {str(e)}"
 
-    twiml = f"""<?xml version="1.0" encoding="UTF-8"?>
+    twiml = f"""<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <Response>
     <Message>{msg}</Message>
 </Response>"""
