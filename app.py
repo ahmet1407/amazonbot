@@ -1,6 +1,3 @@
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
 from flask import Flask, request, jsonify, Response
 from scraper_router import scrape_link
 from score_engine import generate_scorecard
