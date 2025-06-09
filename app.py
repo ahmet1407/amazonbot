@@ -1,11 +1,10 @@
 from flask import Flask, request, jsonify, Response
+from scraper_router import scrape_link
 from score_engine import generate_scorecard
 import logging
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
-
-# scraper_router import'u en sona alındı
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
@@ -17,9 +16,7 @@ def analyze():
 
     try:
         logging.info(f"🔍 Analyze isteği: {product_input}")
-        from scraper_router import scrape_link  # import burada
         product_data = scrape_link(product_input)
-        logging.info(f"📦 Ürün verisi alındı: {product_data['name']}")
         scorecard = generate_scorecard(product_data)
         return jsonify(scorecard)
     except Exception as e:
@@ -33,7 +30,6 @@ def message():
     logging.info(f"📩 Gelen mesaj: {incoming_msg}")
 
     try:
-        from scraper_router import scrape_link  # import burada
         product_data = scrape_link(incoming_msg)
         scorecard = generate_scorecard(product_data)
 
