@@ -14,6 +14,8 @@ def scrape_amazon(url):
     response = requests.get("https://serpapi.com/search", params=params)
     data = response.json()
 
+    print("📦 Amazon verisi:", data)  # Debug log
+
     return {
         "name": data.get("title", "Ürün adı bulunamadı"),
         "price": data.get("price", "Fiyat bulunamadı"),
