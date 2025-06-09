@@ -6,7 +6,11 @@ def generate_scorecard(product_data):
     def score_and_comment(prompt_prefix):
         joined = " | ".join(reviews)
         prompt = f"{prompt_prefix}: {joined}"
+        print("🧠 GPT Prompt:", prompt)  # Debug log
+
         comment = generate_comment(prompt)
+        print("🧠 GPT Yorum:", comment)  # Debug log
+
         score = 80 + len(joined) % 15
         return {"score": score, "comment": comment}
 
