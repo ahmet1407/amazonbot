@@ -1,49 +1,41 @@
-from flask import Flask, request, jsonify, Response
-from twilio.twiml.messaging_response import MessagingResponse
-import traceback
+from flask import request, jsonify
+from app import app
+from utils.detect_platform import detect_platform
+from utils.scrape_amazon import scrape_amazon_product
+from utils.scrape_hepsiburada import scrape_hepsiburada_product
+from utils.serpapi_search import get_best_link_from_search
 import logging
-from scraper_router import process_link_or_name
 
-app = Flask(__name__)
+@app.route("/scrape", methods=["POST"])
+def scrape_product():
+    data = request.get_json()
+    query = data.get("query")
 
-# Logging ayarları
-logging.basicConfig(filename="logs.txt", level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    if not query:
+        return jsonify({"error": "Missing 'query' in request."}), 400
 
-@app.route("/", methods=["GET"])
-def index():
-    return "Scorecard API Active"
-
-@app.route("/whatsapp", methods=["POST"])
-def whatsapp():
     try:
-        incoming_msg = request.values.get("Body", "").strip()
-        sender = request.values.get("From", "")
-
-        logging.info(f"Message received from {sender}: {incoming_msg}")
-
-        if not incoming_msg:
-            raise ValueError("Boş mesaj alındı.")
-
-        scorecard = process_link_or_name(incoming_msg)
-
-        if not scorecard:
-            raise ValueError("Ürün bulunamadı veya analiz yapılamadı.")
-
-        resp = MessagingResponse()
-        msg = resp.message()
-        msg.body(scorecard)
-
-        logging.info(f"Scorecard gönderildi: {scorecard}")
-        return Response(str(resp), mimetype="application/xml")
+        if query.startswith("http://") or query.startswith("https://"):
+            platform = detect_platform(query)
+            if platform == "amazon":
+                return scrape_amazon_product(query)
+            elif platform == "hepsiburada":
+                return scrape_hepsiburada_product(query)
+            else:
+                return jsonify({"error": f"Unsupported platform: {platform}"}), 400
+        else:
+            # Arama yapılmalı
+            link = get_best_link_from_search(query)
+            if not link:
+                return jsonify({"error": "No product link found for the search."}), 404
+            platform = detect_platform(link)
+            if platform == "amazon":
+                return scrape_amazon_product(link)
+            elif platform == "hepsiburada":
+                return scrape_hepsiburada_product(link)
+            else:
+                return jsonify({"error": f"Unsupported platform in search result: {platform}"}), 400
 
     except Exception as e:
-        error_trace = traceback.format_exc()
-        logging.error(f"Hata: {str(e)}\nTraceback: {error_trace}")
-
-        resp = MessagingResponse()
-        msg = resp.message()
-        msg.body("Üzgünüz, bir hata oluştu. Lütfen tekrar deneyin.")
-        return Response(str(resp), mimetype="application/xml")
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+        logging.exception("Unexpected error during scraping:")
+        return jsonify({"error": str(e)}), 500
