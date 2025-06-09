@@ -1,16 +1,12 @@
 import os
 from openai import OpenAI
 
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-def generate_comment(prompt):
+def analyze_with_gpt(prompt):
     response = client.chat.completions.create(
         model="gpt-4",
-        messages=[
-            {"role": "system", "content": "Ürün analizleri yapan bir uzman gibi davran."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.6,
-        max_tokens=150
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.7
     )
     return response.choices[0].message.content.strip()
