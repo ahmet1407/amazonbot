@@ -1,14 +1,15 @@
-from detect_platform import detect_platform
-from scrape_amazon import scrape_amazon
-from scrape_hepsiburada import scrape_hepsiburada
-from serpapi_search import search_link
+from utils.scrape_amazon import scrape_amazon_product
+from utils.scrape_hepsiburada import scrape_hepsiburada_product
+from utils.scrape_trendyol import scrape_trendyol_product
+from utils.detect_platform import detect_platform
 
-def scrape_link(link: str):
-    platform = detect_platform(link)
-
-    if platform == "amazon":
-        return scrape_amazon(link)
-    elif platform == "hepsiburada":
-        return scrape_hepsiburada(link)
+def get_scraper_for_url(url):
+    platform = detect_platform(url)
+    if platform == 'amazon':
+        return scrape_amazon_product
+    elif platform == 'hepsiburada':
+        return scrape_hepsiburada_product
+    elif platform == 'trendyol':
+        return scrape_trendyol_product
     else:
-        return search_link(link)  # fallback to SerpAPI
+        raise ValueError("Desteklenmeyen platform")
